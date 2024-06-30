@@ -1,13 +1,13 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:graduation_project/Providers/CartProvider.dart';
+import 'package:graduation_project/Providers/UserProvider.dart';
 import 'package:graduation_project/Screens/simialrDrugs.dart';
 import 'package:graduation_project/components/button.dart';
 import 'package:graduation_project/helpers/snackbar.dart';
+import 'package:graduation_project/models/cartModel.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
-
-import '../Providers/UserProvider.dart';
 
 class DrugDetails extends StatefulWidget {
   final String id;
@@ -19,7 +19,6 @@ class DrugDetails extends StatefulWidget {
 }
 
 class _DrugDetailsState extends State<DrugDetails> {
-
   @override
   void initState() {
     super.initState();
@@ -27,28 +26,28 @@ class _DrugDetailsState extends State<DrugDetails> {
   }
 
   Future<void> _loadDrugDetails() async {
+    Provider.of<CartProvider>(context, listen: false);
     Provider.of<UserProvider>(context, listen: false);
-    setState(() {
-    });
+    setState(() {});
   }
-
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
+    String drugName = '';
+    int drugPrice = 0;
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
-        title:Text(
+        title: Text(
           'Drug Details',
           style: GoogleFonts.righteous(
-            color: Colors.green,
-            fontSize: 35,
-            fontWeight: FontWeight.w900
-        ),),
+              color: Colors.green, fontSize: 35, fontWeight: FontWeight.w900),
+        ),
         iconTheme: const IconThemeData(color: Colors.green),
       ),
       body: FutureBuilder(
@@ -56,7 +55,7 @@ class _DrugDetailsState extends State<DrugDetails> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child:Lottie.asset(
+              child: Lottie.asset(
                 'assets/Loading.json',
                 height: 300,
                 width: 300,
@@ -69,6 +68,8 @@ class _DrugDetailsState extends State<DrugDetails> {
           }
 
           final drug = snapshot.data as Map<String, dynamic>;
+          drugName = drug['name'] as String? ?? '';
+          drugPrice = drug['price'] as int? ?? 0;
 
           return Padding(
             padding: const EdgeInsets.only(top: 50),
@@ -78,7 +79,8 @@ class _DrugDetailsState extends State<DrugDetails> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeInOut,
-                    margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 20.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20.0),
@@ -107,30 +109,27 @@ class _DrugDetailsState extends State<DrugDetails> {
                           ),
                           const SizedBox(height: 20),
                           Text(
-                           'ActiveIngredient: ${drug['activeIngredient'] as String? ?? 'No '}',
+                            'ActiveIngredient: ${drug['activeIngredient'] as String? ?? 'No '}',
                             style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.black,
-                              fontWeight: FontWeight.bold
-                            ),
+                                fontSize: 16,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
                           Text(
                             'Price: ${drug['price'] as num? ?? ''} EGP',
                             style: const TextStyle(
-                              fontSize: 16,
-                              color: Colors.red,
-                              fontWeight: FontWeight.bold
-                            ),
+                                fontSize: 16,
+                                color: Colors.red,
+                                fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
-
                         ],
                       ),
                     ),
                   ),
                 ),
-               const SizedBox(
+                const SizedBox(
                   height: 50,
                 ),
                 CustomButton(
@@ -140,8 +139,9 @@ class _DrugDetailsState extends State<DrugDetails> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => SimilarDrugs(drugId: widget.id,)
-                      ),
+                          builder: (context) => SimilarDrugs(
+                                drugId: widget.id,
+                              )),
                     );
                   },
                 ),
@@ -161,9 +161,12 @@ class _DrugDetailsState extends State<DrugDetails> {
                             context: context,
                             builder: (context) {
                               return StatefulBuilder(
-                                builder: (BuildContext context, StateSetter setState) {
+                                builder: (BuildContext context,
+                                    StateSetter setState) {
                                   return AlertDialog(
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     content: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -172,12 +175,14 @@ class _DrugDetailsState extends State<DrugDetails> {
                                           style: GoogleFonts.righteous(
                                               color: Colors.green,
                                               fontSize: 26,
-                                              fontWeight: FontWeight.w900
-                                          ),
+                                              fontWeight: FontWeight.w900),
                                         ),
-                                        SizedBox(height: 20,),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             IconButton(
                                               onPressed: () {
@@ -212,9 +217,13 @@ class _DrugDetailsState extends State<DrugDetails> {
                                     actions: [
                                       TextButton(
                                         onPressed: () async {
-                                          await userProvider.addToCart(widget.id,quantity);
+                                          final drug = DrugModel(
+                                              name: drugName);
+                                          await cartProvider.addToCart(
+                                              drug, quantity, drugPrice as int);
                                           Navigator.of(context).pop();
-                                          showSnackBar(context, "Added To Cart");
+                                          showSnackBar(
+                                              context, "Added To Cart");
                                         },
                                         child: const Text(
                                           'Add',
@@ -223,7 +232,8 @@ class _DrugDetailsState extends State<DrugDetails> {
                                       ),
                                       TextButton(
                                         onPressed: () {
-                                          Navigator.of(context).pop(); // Close the dialog
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
                                         },
                                         child: const Text(
                                           'Cancel',
@@ -244,7 +254,6 @@ class _DrugDetailsState extends State<DrugDetails> {
               ],
             ),
           );
-
         },
       ),
     );

@@ -42,7 +42,7 @@ class UserProvider with ChangeNotifier {
       final dio = Dio();
 
       dio.options.headers['Authorization'] = 'Bearer $token';
-      final response = await dio.get('http://here:300/profile');
+      final response = await dio.get('http://192.168.1.20:3000/profile');
       final data = response.data;
       user = User.fromJson(data['user']);
       notifyListeners();
@@ -61,7 +61,7 @@ class UserProvider with ChangeNotifier {
     final dio = Dio();
     dio.options.headers['Authorization'] = 'Bearer $token';
 
-    final response = await dio.get('http://here:3000/drugs?page=$_currentPage');
+    final response = await dio.get('http://192.168.1.20:3000/drugs?page=$_currentPage');
     if (response.statusCode == 200) {
       final drugs = List<Map<String, dynamic>>.from(response.data['drugs']);
       return drugs.map((drug) => Drug(
@@ -109,7 +109,7 @@ class UserProvider with ChangeNotifier {
       final dio = Dio();
       dio.options.headers['Authorization'] = 'Bearer $token';
 
-      final response = await dio.get("http://here:3000/search?search=$query&page=$page");
+      final response = await dio.get("http://192.168.1.20:3000/search?search=$query&page=$page");
       if (response.statusCode == 200) {
         _drugsSearch = List<Map<String, dynamic>>.from(response.data['drugs']);
         _totalDrugsSearch = response.data['totalDrugs'];
@@ -149,7 +149,7 @@ class UserProvider with ChangeNotifier {
       final dio = Dio();
       dio.options.headers['Authorization'] = 'Bearer $token';
 
-      final response = await dio.get("http://here:3000/drug/$id");
+      final response = await dio.get("http://192.168.1.20:3000/drug/$id");
       if (response.statusCode == 200) {
         return Map<String, dynamic>.from(response.data['drug']);
       } else {
@@ -164,7 +164,7 @@ class UserProvider with ChangeNotifier {
 
   Future<List<Drug>> getSimilarDrugs(String id, int similarPage) async {
     try {
-      final response = await Dio().get('http://here:3000/similarDrugs/$id?page=$similarPage');
+      final response = await Dio().get('http://192.168.1.20:3000/similarDrugs/$id?page=$similarPage');
       final data = response.data['similarDrugs'] as List<dynamic>;
       _totalDrugsSimilar = response.data['totalDrugs'];
       final drugs = data.map((item) => Drug.fromJson(item)).toList();
@@ -205,7 +205,7 @@ class UserProvider with ChangeNotifier {
       final dio = Dio();
       dio.options.headers['Authorization'] = 'Bearer $token';
 
-      final response = await dio.get('http://here:3000/cart');
+      final response = await dio.get('http://192.168.1.20:3000/cart');
       final data = response.data;
 
       if (data != null) {
@@ -237,7 +237,7 @@ class UserProvider with ChangeNotifier {
 
     dio.options.headers['Authorization'] = 'Bearer $token';
 
-    final url = 'http://here:3000/cart/removeItem/$drugId';
+    final url = 'http://192.168.1.20:3000/cart/removeItem/$drugId';
 
     try {
       final response = await dio.delete(url);
@@ -263,7 +263,7 @@ class UserProvider with ChangeNotifier {
     dio.options.headers['Authorization'] = 'Bearer $token';
 
     try {
-      final response = await dio.get('http://here:3000/order/Orders');
+      final response = await dio.get('http://192.168.1.20:3000/order/Orders');
       final orders = response.data['orders'];
 
       List<Order> orderList = [];
@@ -292,7 +292,7 @@ class UserProvider with ChangeNotifier {
 
     dio.options.headers['Authorization'] = 'Bearer $token';
 
-    final url = 'http://here:3000/order/cancelOrder/$cartId';
+    final url = 'http://192.168.1.20:3000/order/cancelOrder/$cartId';
 
     try {
       final response = await dio.delete(url);
@@ -315,7 +315,7 @@ class UserProvider with ChangeNotifier {
     final dio = Dio();
     dio.options.headers['Authorization'] = 'Bearer $token';
 
-    final url = 'http://here:3000/deleteAllHistory';
+    final url = 'http://192.168.1.20:3000/deleteAllHistory';
 
     try {
       final response = await dio.delete(url);
@@ -335,7 +335,7 @@ class UserProvider with ChangeNotifier {
     final dio = Dio();
     dio.options.headers['Authorization'] = 'Bearer $token';
     try {
-      var url = 'http://here:3000/cart/addToCart/$drugId';
+      var url = 'http://192.168.1.20:3000/cart/addToCart/$drugId';
       var response = await dio.post(
         url,
         data: {
@@ -360,7 +360,7 @@ class UserProvider with ChangeNotifier {
       final dio = Dio();
       dio.options.headers['Authorization'] = 'Bearer $token';
       Response response = await dio.post(
-        'http://here:3000/order/checkout',
+        'http://192.168.1.20:3000/order/checkout',
         data: {
           'shippingAddress': shippingAddress,
           'phone':phone,
@@ -403,7 +403,7 @@ class UserProvider with ChangeNotifier {
 
   Future<void> updateUserName(String newUserName) async {
 
-    const url = 'http://here:3000/editUser';
+    const url = 'http://192.168.1.20:3000/editUser';
     final headers = {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -427,40 +427,9 @@ class UserProvider with ChangeNotifier {
 
 
 
-
-
-// Future<void> setUser()async
-// {
-//   await SaveToken();
-//   // List<String>? tokenParts = token?.split('.');
-//   // String header = tokenParts![0];
-//   // String payload = tokenParts[1];
-//   // String signature = tokenParts[2];
-//   //
-//   // String decodedPayload = utf8.decode(base64Url.decode(payload));
-//   // Map<String, dynamic> payloadMap = json.decode(decodedPayload);
-//
-//
-//    user=User(
-//
-//       userId: payloadMap['userId'],
-//      createdAt: payloadMap['createdAt'],
-//       userName: payloadMap['userName'],
-//       role: payloadMap['role'],
-//       email:payloadMap['email'],
-//
-//   );
-//
-//
-//
-// }
-
-
     Future<void> logOut() async {
       const storage = FlutterSecureStorage();
       await storage.delete(key: 'token');
     }
-
-
 
 }

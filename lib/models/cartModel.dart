@@ -13,6 +13,13 @@ class UserModel {
       userName: json['userName'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'email': email,
+      'userName': userName,
+    };
+  }
 }
 
 class DrugModel {
@@ -26,6 +33,12 @@ class DrugModel {
     return DrugModel(
       name: json['name'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+    };
   }
 }
 
@@ -49,6 +62,15 @@ class CartItemModel {
       price: json['price'],
       id: json['_id'],
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'drug': drug.toJson(),
+      'quantity': quantity,
+      'price': price,
+      '_id': id,
+    };
   }
 }
 
@@ -74,6 +96,15 @@ class CartModel {
       ),
       createdAt: DateTime.parse(json['createdAt']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'user': user.toJson(),
+      'items': items.map((item) => item.toJson()).toList(),
+      'createdAt': createdAt.toIso8601String(),
+    };
   }
 }
 
