@@ -1,20 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graduation_project/helpers/snackbar.dart';
-import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/UserProvider.dart';
-import '../models/orderModel.dart';
 
 class Orders extends StatefulWidget {
-
   @override
   State<Orders> createState() => _OrdersState();
 }
 
 class _OrdersState extends State<Orders> {
-  Future<List<Order>>? ordersDataFuture;
   @override
   void initState() {
     super.initState();
@@ -22,22 +18,21 @@ class _OrdersState extends State<Orders> {
   }
 
   Future<void> _loadOrdersDetails() async {
-    Provider.of<UserProvider>(context, listen: false);
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+    await userProvider.fetchOrders();
     setState(() {});
   }
+
   Future<void> _deleteOrder(String orderId) async {
     final userProvider = Provider.of<UserProvider>(context, listen: false);
-
     await userProvider.deleteOrder(orderId);
-
-    setState(() {
-      ordersDataFuture = userProvider.fetchOrders();
-    });
+    setState(() {});
   }
 
   @override
   Widget build(BuildContext context) {
     final userProvider = Provider.of<UserProvider>(context);
+    final orders = userProvider.orders;
 
     return Scaffold(
       appBar: AppBar(
@@ -54,19 +49,8 @@ class _OrdersState extends State<Orders> {
         ),
         iconTheme: const IconThemeData(color: Colors.green),
       ),
-      body: FutureBuilder<List<Order>>(
-        future: userProvider.fetchOrders(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child:Lottie.asset(
-              'assets/Loading.json',
-              height: 300,
-              width: 300,
-            ),
-            );
-          } else if (snapshot.hasError) {
-            return Center(
+      body: orders.isEmpty
+          ? Center(
               child: Text(
                 'No Orders',
                 style: GoogleFonts.righteous(
@@ -75,17 +59,14 @@ class _OrdersState extends State<Orders> {
                   fontWeight: FontWeight.w900,
                 ),
               ),
-            );
-          } else {
-            final orders = snapshot.data!;
-
-            return Column(
+            )
+          : Column(
               children: [
                 Expanded(
                   child: ScrollbarTheme(
                     data: ScrollbarThemeData(
                       thumbColor: MaterialStateProperty.resolveWith<Color>(
-                            (states) => Colors.green.shade300,
+                        (states) => Colors.green.shade300,
                       ),
                     ),
                     child: Scrollbar(
@@ -122,16 +103,15 @@ class _OrdersState extends State<Orders> {
                                 padding: const EdgeInsets.all(20.0),
                                 child: Column(
                                   mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                                      MainAxisAlignment.spaceBetween,
                                   children: [
                                     Column(
                                       mainAxisSize: MainAxisSize.min,
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.center,
+                                          CrossAxisAlignment.center,
                                       mainAxisAlignment:
-                                      MainAxisAlignment.center,
+                                          MainAxisAlignment.center,
                                       children: [
-
                                         const SizedBox(height: 20),
                                         Text(
                                           "Phone: ${order.phone}",
@@ -185,24 +165,40 @@ class _OrdersState extends State<Orders> {
                                         showDialog(
                                           context: context,
                                           builder: (context) => AlertDialog(
-                                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                                            content: const Text('Are you sure you want to delete this order?', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w500),),
+                                            shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20)),
+                                            content: const Text(
+                                              'Are you sure you want to delete this order?',
+                                              style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontWeight: FontWeight.w500),
+                                            ),
                                             actions: [
                                               TextButton(
-                                                onPressed: ()async {
-
-                                                   await _deleteOrder(order.id);
+                                                onPressed: () async {
+                                                  await _deleteOrder(order.id);
 
                                                   Navigator.of(context).pop();
-                                                  showSnackBar(context, "Order Canceled");
+                                                  showSnackBar(context,
+                                                      "Order Canceled");
                                                 },
-                                                child: const Text('Cancel', style: TextStyle(color: Colors.red),),
+                                                child: const Text(
+                                                  'Cancel',
+                                                  style: TextStyle(
+                                                      color: Colors.red),
+                                                ),
                                               ),
                                               TextButton(
                                                 onPressed: () {
-                                                  Navigator.of(context).pop(); // Close the dialog
+                                                  Navigator.of(context)
+                                                      .pop(); // Close the dialog
                                                 },
-                                                child: const Text('Back', style: TextStyle(color: Colors.green),),
+                                                child: const Text(
+                                                  'Back',
+                                                  style: TextStyle(
+                                                      color: Colors.green),
+                                                ),
                                               ),
                                             ],
                                           ),
@@ -214,7 +210,6 @@ class _OrdersState extends State<Orders> {
                                         color: Colors.red,
                                       ),
                                     ),
-
                                   ],
                                 ),
                               ),
@@ -226,10 +221,7 @@ class _OrdersState extends State<Orders> {
                   ),
                 ),
               ],
-            );
-          }
-        },
-      ),
+            ),
     );
   }
 }

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:graduation_project/models/userModel.dart';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/cartModel.dart';
 import '../models/drugsModel.dart';
 import '../models/orderModel.dart';
@@ -28,6 +28,39 @@ class UserProvider with ChangeNotifier {
   CartModel? cartData;
   int? totalPrice;
 
+  List<Order> _orders = [];
+
+  List<Order> get orders => _orders;
+
+  Future<void> fetchOrders() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ordersData = prefs.getString('ordersData');
+    if (ordersData != null) {
+      _orders = (jsonDecode(ordersData) as List)
+          .map((data) => Order.fromJson(data))
+          .toList();
+      notifyListeners();
+    }
+  }
+
+  Future<void> addOrder(Order order) async {
+    _orders.add(order);
+    await _saveOrdersToLocalStorage();
+    notifyListeners();
+  }
+
+  Future<void> deleteOrder(String orderId) async {
+    _orders.removeWhere((order) => order.id == orderId);
+    await _saveOrdersToLocalStorage();
+    notifyListeners();
+  }
+
+  Future<void> _saveOrdersToLocalStorage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final ordersData = jsonEncode(_orders.map((order) => order.toJson()).toList());
+    prefs.setString('ordersData', ordersData);
+  }
+  
   Future<void> saveToken() async
   {
     const storage = FlutterSecureStorage();
@@ -181,133 +214,21 @@ class UserProvider with ChangeNotifier {
   List<Drug> get similarDrugs => _similarDrugs;
   int get similarPage => _similarPage;
 
-  Future<void> nextPageSimilar(String id) async {
-    final drugs = await getSimilarDrugs(id, _similarPage + 1);
-    if (drugs.isNotEmpty) {
-      _similarDrugs = drugs;
-      _similarPage++;
-    }
-  }
+  // Future<void> nextPageSimilar(String id) async {
+  //   final drugs = await getSimilarDrugs(id, _similarPage + 1);
+  //   if (drugs.isNotEmpty) {
+  //     _similarDrugs = drugs;
+  //     _similarPage++;
+  //   }
+  // }
 
-  Future<void> previousPageSimilar(String id) async {
-    if (_similarPage > 1) {
-      final drugs = await getSimilarDrugs(id, _similarPage - 1);
-      _similarDrugs = drugs;
-      _similarPage--;
-    }
-  }
-
-
-  Future<Map<String, dynamic>> fetchCartData() async {
-    try {
-      await saveToken();
-
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $token';
-
-      final response = await dio.get('http://192.168.1.20:3000/cart');
-      final data = response.data;
-
-      if (data != null) {
-        final responseData = ResponseModel.fromJson(data);
-        final cartData = responseData.cart;
-        final totalPrice = responseData.totalPrice;
-        notifyListeners();
-
-        return {
-          'cartData': cartData,
-          'totalPrice': totalPrice,
-        };
-      } else {
-        throw Exception('Success');
-      }
-    } catch (e) {
-      print('Empty');
-      rethrow;
-    }
-  }
-
-
-
-
-  Future<void> deleteDrugFromCart(String drugId) async {
-    await saveToken();
-
-    final dio = Dio();
-
-    dio.options.headers['Authorization'] = 'Bearer $token';
-
-    final url = 'http://192.168.1.20:3000/cart/removeItem/$drugId';
-
-    try {
-      final response = await dio.delete(url);
-
-      if (response.statusCode == 200) {
-
-      } else {
-
-        print('Failed to delete the drug from the cart. Status code: ${response.statusCode}');
-      }
-    } catch (error) {
-
-      print('Failed to delete the drug from the cart: $error');
-    }
-  }
-
-
-
-  Future<List<Order>> fetchOrders() async {
-    final dio = Dio();
-
-    await saveToken();
-    dio.options.headers['Authorization'] = 'Bearer $token';
-
-    try {
-      final response = await dio.get('http://192.168.1.20:3000/order/Orders');
-      final orders = response.data['orders'];
-
-      List<Order> orderList = [];
-      for (var order in orders) {
-        orderList.add(Order(
-          id: order['_id'],
-          phone: order['phone'],
-          shippingAddress: order['shippingAddress'],
-          paymentMethod: order['paymentMethod'],
-          status: order['status'],
-          totalPrice: order['totalPrice'],
-        ));
-      }
-
-      return orderList;
-    } catch (error) {
-      print('Error fetching orders: $error');
-      return [];
-    }
-  }
-
-  Future<void> deleteOrder(String cartId) async {
-    await saveToken();
-
-    final dio = Dio();
-
-    dio.options.headers['Authorization'] = 'Bearer $token';
-
-    final url = 'http://192.168.1.20:3000/order/cancelOrder/$cartId';
-
-    try {
-      final response = await dio.delete(url);
-
-      if (response.statusCode == 200) {
-
-      } else {
-
-        print('Failed to delete the Order. Status code: ${response.statusCode}');
-      }
-    } catch (error) {
-
-      print('Failed to delete the drug Order: $error');
-    }
-  }
+  // Future<void> previousPageSimilar(String id) async {
+  //   if (_similarPage > 1) {
+  //     final drugs = await getSimilarDrugs(id, _similarPage - 1);
+  //     _similarDrugs = drugs;
+  //     _similarPage--;
+  //   }
+  // }
 
   Future<void> deleteAllHistory() async {
 
@@ -329,30 +250,6 @@ class UserProvider with ChangeNotifier {
       print('Error deleting history: $e');
     }
   }
-
-  Future<void> addToCart(String drugId, int quantity) async {
-    await saveToken();
-    final dio = Dio();
-    dio.options.headers['Authorization'] = 'Bearer $token';
-    try {
-      var url = 'http://192.168.1.20:3000/cart/addToCart/$drugId';
-      var response = await dio.post(
-        url,
-        data: {
-          "quantity": quantity,
-        },
-      );
-      if (response.statusCode == 200) {
-        print('Drug added to cart successfully!');
-      } else {
-        print('Failed to add drug to cart. Status code: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error: $e');
-    }
-  }
-
-
 
   Future<void> updateUserName(String newUserName) async {
 

@@ -227,7 +227,7 @@ class _ProfileState extends State<Profile> {
                         color: Colors.green,
                       ),
                       title: Text(
-                        user?.createdAt?.toString() ?? '',
+                        user?.createdAt.toString() ?? '',
                         style: const TextStyle(fontSize: 18),
                       ),
                     ),

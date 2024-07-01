@@ -7,7 +7,6 @@ import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
 import '../models/drugsModel.dart';
-import 'DrugDetails.dart';
 
 class SimilarDrugs extends StatefulWidget {
   final String drugId;
@@ -122,7 +121,7 @@ class _SimilarDrugsState extends State<SimilarDrugs> {
                     radius: const Radius.circular(5),
                     child: ListView.builder(
                       physics: BouncingScrollPhysics(),
-                      itemCount: drugs!.length,
+                      itemCount: drugs.length,
                       itemBuilder: (context, index) {
                         final drug = drugs[index];
 

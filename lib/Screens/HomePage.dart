@@ -1,9 +1,5 @@
-import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:graduation_project/Conestants/color.dart';
-import 'package:graduation_project/Screens/cart.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 

@@ -1,9 +1,9 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:graduation_project/Screens/simialrDrugs.dart';
+import 'package:graduation_project/Providers/CartProvider.dart';
 import 'package:graduation_project/components/button.dart';
 import 'package:graduation_project/helpers/snackbar.dart';
+import 'package:graduation_project/models/cartModel.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';
 
@@ -14,13 +14,11 @@ class similarDrugDetails extends StatefulWidget {
 
   similarDrugDetails({Key? key, required this.id}) : super(key: key);
 
-
   @override
   State<similarDrugDetails> createState() => _similarDrugDetailsState();
 }
 
 class _similarDrugDetailsState extends State<similarDrugDetails> {
-
   @override
   void initState() {
     super.initState();
@@ -28,28 +26,27 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
   }
 
   Future<void> _loadDrugDetails() async {
-    Provider.of<UserProvider>(context, listen: false);
-    setState(() {
-    });
+    Provider.of<CartProvider>(context, listen: false);
+    setState(() {});
   }
-
 
   @override
   Widget build(BuildContext context) {
+    final cartProvider = Provider.of<CartProvider>(context);
     final userProvider = Provider.of<UserProvider>(context);
+    String drugName = '';
+    int drugPrice = 0;
 
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
-        title:Text(
+        title: Text(
           'Similar Drug Details',
           style: GoogleFonts.righteous(
-              color: Colors.green,
-              fontSize: 30,
-              fontWeight: FontWeight.w900
-          ),),
+              color: Colors.green, fontSize: 30, fontWeight: FontWeight.w900),
+        ),
         iconTheme: const IconThemeData(color: Colors.green),
       ),
       body: FutureBuilder(
@@ -57,11 +54,12 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
-              child:Lottie.asset(
-              'assets/Loading.json',
-              height: 300,
-              width: 300,
-            ),);
+              child: Lottie.asset(
+                'assets/Loading.json',
+                height: 300,
+                width: 300,
+              ),
+            );
           }
 
           if (snapshot.hasError) {
@@ -69,6 +67,8 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
           }
 
           final drug = snapshot.data as Map<String, dynamic>;
+          drugName = drug['name'] as String? ?? '';
+          drugPrice = drug['price'] as int? ?? 0;
 
           return Padding(
             padding: const EdgeInsets.only(top: 50),
@@ -78,7 +78,8 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeInOut,
-                    margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 20.0),
+                    margin: const EdgeInsets.symmetric(
+                        horizontal: 20.0, vertical: 20.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(20.0),
@@ -111,8 +112,7 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
                             style: const TextStyle(
                                 fontSize: 16,
                                 color: Colors.black,
-                                fontWeight: FontWeight.bold
-                            ),
+                                fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
                           Text(
@@ -120,11 +120,9 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
                             style: const TextStyle(
                                 fontSize: 16,
                                 color: Colors.red,
-                                fontWeight: FontWeight.bold
-                            ),
+                                fontWeight: FontWeight.bold),
                           ),
                           const SizedBox(height: 20),
-
                         ],
                       ),
                     ),
@@ -146,9 +144,12 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
                             context: context,
                             builder: (context) {
                               return StatefulBuilder(
-                                builder: (BuildContext context, StateSetter setState) {
+                                builder: (BuildContext context,
+                                    StateSetter setState) {
                                   return AlertDialog(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(20)),
                                     content: Column(
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
@@ -157,12 +158,14 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
                                           style: GoogleFonts.righteous(
                                               color: Colors.green,
                                               fontSize: 26,
-                                              fontWeight: FontWeight.w900
-                                          ),
+                                              fontWeight: FontWeight.w900),
                                         ),
-                                        SizedBox(height: 20,),
+                                        SizedBox(
+                                          height: 20,
+                                        ),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             IconButton(
                                               onPressed: () {
@@ -197,9 +200,13 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
                                     actions: [
                                       TextButton(
                                         onPressed: () async {
-                                          await userProvider.addToCart(widget.id,quantity);
+                                          final drug =
+                                              DrugModel(name: drugName);
+                                          await cartProvider.addToCart(
+                                              drug, quantity, drugPrice);
                                           Navigator.of(context).pop();
-                                          showSnackBar(context, "Added To Cart");
+                                          showSnackBar(
+                                              context, "Added To Cart");
                                         },
                                         child: const Text(
                                           'Add',
@@ -208,7 +215,8 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
                                       ),
                                       TextButton(
                                         onPressed: () {
-                                          Navigator.of(context).pop(); // Close the dialog
+                                          Navigator.of(context)
+                                              .pop(); // Close the dialog
                                         },
                                         child: const Text(
                                           'Cancel',
@@ -229,7 +237,6 @@ class _similarDrugDetailsState extends State<similarDrugDetails> {
               ],
             ),
           );
-
         },
       ),
     );

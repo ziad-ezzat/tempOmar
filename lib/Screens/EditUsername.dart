@@ -1,19 +1,12 @@
-import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:graduation_project/components/TextFormField.dart';
 import 'package:graduation_project/components/button.dart';
 import 'package:graduation_project/helpers/snackbar.dart';
-import 'package:graduation_project/layout/home_layout.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 import 'package:provider/provider.dart';
 
 import '../Providers/UserProvider.dart';
-import '../models/login_model.dart';
-import 'Profile.dart';
-
 class EditUsername extends StatefulWidget {
   @override
   State<EditUsername> createState() => _EditUsernameState();
@@ -104,10 +97,10 @@ class _EditUsernameState extends State<EditUsername> {
                       if (value!.isEmpty) {
                         return 'Username is required';
                       }
-                      if (value!.length < 4) {
+                      if (value.length < 4) {
                         return 'Username must be at least 4 characters long';
                       }
-                      if (value!.length > 20) {
+                      if (value.length > 20) {
                         return 'Username must be less than 20 characters long';
                       }
                       return null;

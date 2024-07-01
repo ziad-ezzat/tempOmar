@@ -5,16 +5,13 @@ import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:graduation_project/Screens/login.dart';
 import 'package:graduation_project/helpers/showdialog.dart';
 import 'package:graduation_project/components/button.dart';
-import 'package:graduation_project/helpers/showdialog.dart';
 import 'package:graduation_project/models/signup_model.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
 import '../components/TextFormField.dart';
 import '../helpers/snackbar.dart';
-import '../layout/home_layout.dart';
 
 class Signup extends StatefulWidget {
 
@@ -115,10 +112,10 @@ class _signupState extends State<Signup> {
                       if (value!.isEmpty) {
                         return 'Username is required';
                       }
-                      if (value!.length < 4) {
+                      if (value.length < 4) {
                         return 'Username must be at least 4 characters long';
                       }
-                      if (value!.length > 20) {
+                      if (value.length > 20) {
                         return 'Username must be less than 20 characters long';
                       }
                       return null;

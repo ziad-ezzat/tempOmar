@@ -70,9 +70,9 @@ class _CartState extends State<Cart> {
                         radius: const Radius.circular(5),
                         child: ListView.builder(
                           physics: BouncingScrollPhysics(),
-                          itemCount: cartData?.items.length ?? 0,
+                          itemCount: cartData.items.length,
                           itemBuilder: (context, index) {
-                            final cartItem = cartData!.items[index];
+                            final cartItem = cartData.items[index];
                             return Column(
                               children: [
                                 Padding(

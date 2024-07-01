@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:dio/dio.dart';
 
 Dio dio = Dio();
 Future<void> signupModel(String userName, String email, String password, String confirmPassword) async {

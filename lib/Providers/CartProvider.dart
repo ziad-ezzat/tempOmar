@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:graduation_project/Providers/UserProvider.dart';
+import 'package:graduation_project/models/orderModel.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:graduation_project/models/cartModel.dart';
 
@@ -60,15 +62,33 @@ class CartProvider with ChangeNotifier {
     prefs.setString('cartData', cartData);
   }
 
-  Future<void> checkout(String shippingAddress, String phone, String paymentMethod) async {
-    
-      print('checkout');
-      print('shippingAddress: $shippingAddress');
-      print('phone: $phone');
-      print('paymentMethod: $paymentMethod');
+  Future<void> checkout(String shippingAddress, String phone, String paymentMethod, UserProvider userProvider) async {
+    print('checkout');
+    print('shippingAddress: $shippingAddress');
+    print('phone: $phone');
+    print('paymentMethod: $paymentMethod');
 
-      cart?.items.clear();
-      await _saveCartToLocalStorage();
-      notifyListeners();
+    if (_cart == null || _cart!.items.isEmpty) {
+      print('Cart is empty, cannot proceed with checkout.');
+      return;
+    }
+
+    // Create a new Order
+    final newOrder = Order(
+      id: DateTime.now().toString(),
+      phone: phone,
+      shippingAddress: shippingAddress,
+      paymentMethod: paymentMethod,
+      status: 'Pending', // or whatever initial status you want
+      totalPrice: totalPrice.toInt(), // assuming totalPrice is a double
+    );
+
+    // Add the order to the user's orders
+    await userProvider.addOrder(newOrder);
+
+    // Clear the cart
+    _cart?.items.clear();
+    await _saveCartToLocalStorage();
+    notifyListeners();
   }
 }
