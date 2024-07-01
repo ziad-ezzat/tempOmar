@@ -1,38 +1,65 @@
-class User {
-  String email;
-  String userName;
-  List<Map<String, dynamic>> searchHistory;
-  List<Map<String, dynamic>> orderHistory;
-  String role;
-  DateTime createdAt;
+import 'package:graduation_project/models/orderModel.dart';
 
-  User.fromJson(Map<String, dynamic> json)
-      : email = json['email'],
-        userName = json['userName'],
-        searchHistory = List<Map<String, dynamic>>.from(json['searchHistory']),
-        orderHistory = List<Map<String, dynamic>>.from(json['orderHistory']),
-        role = json['role'],
-        createdAt = DateTime.parse(json['createdAt']) {
-    if (json['orderHistory'] != null) {
-      orderHistory = List<Map<String, dynamic>>.from(json['orderHistory'])
-          .map((order) => {
-        '_id': order['_id'],
-        'totalPrice': order['totalPrice'],
-        'phone': order['phone'],
-        'shippingAddress': order['shippingAddress'],
-        'paymentMethod': order['paymentMethod'],
-        'status': order['status'],
-        'items': List<Map<String, dynamic>>.from(order['items'])
-            .map((item) => {
-          'drug': item['drug'],
-          'quantity': item['quantity'],
-          'price': item['price'],
-          '_id': item['_id'],
-        })
-            .toList(),
-        'createdAt': order['createdAt'],
-      })
-          .toList();
-    }
+class User {
+  final String id;
+  final String userName;
+  final String email;
+  final DateTime createdAt;
+  final String role;
+  final List<Order> orderHistory;
+  final List<String> searchHistory;
+
+  User({
+    required this.id,
+    required this.userName,
+    required this.email,
+    required this.createdAt,
+    required this.role,
+    required this.orderHistory,
+    required this.searchHistory,
+  });
+
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      userName: json['userName'],
+      email: json['email'],
+      createdAt: DateTime.parse(json['createdAt']),
+      role: json['role'],
+      orderHistory: (json['orderHistory'] as List).map((order) => Order.fromJson(order)).toList(),
+      searchHistory: List<String>.from(json['searchHistory']),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'userName': userName,
+      'email': email,
+      'createdAt': createdAt.toIso8601String(),
+      'role': role,
+      'orderHistory': orderHistory.map((order) => order.toJson()).toList(),
+      'searchHistory': searchHistory,
+    };
+  }
+
+  User copyWith({
+    String? id,
+    String? userName,
+    String? email,
+    DateTime? createdAt,
+    String? role,
+    List<Order>? orderHistory,
+    List<String>? searchHistory,
+  }) {
+    return User(
+      id: id ?? this.id,
+      userName: userName ?? this.userName,
+      email: email ?? this.email,
+      createdAt: createdAt ?? this.createdAt,
+      role: role ?? this.role,
+      orderHistory: orderHistory ?? this.orderHistory,
+      searchHistory: searchHistory ?? this.searchHistory,
+    );
   }
 }

@@ -181,7 +181,7 @@ final passwordController= TextEditingController();
                           setState(() {
                             isLoading=true;
                           });
-                          await loginModel(email, password);
+                          await loginModel(context,email, password);
                           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>HomeLayout(currentIndex: 0,)));
                           showSnackBar(context, "Login Successfully");
                         } on DioError catch (e) {

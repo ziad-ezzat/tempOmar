@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:graduation_project/models/userModel.dart';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -13,7 +12,7 @@ import '../models/orderModel.dart';
 
 class UserProvider with ChangeNotifier {
   String? token;
-  User? user;
+  User? _user;
   String? userName;
   final List<Map<String, dynamic>> _drugs = [];
   List<Map<String, dynamic>> _drugsSearch = [];
@@ -31,6 +30,10 @@ class UserProvider with ChangeNotifier {
   List<Order> _orders = [];
 
   List<Order> get orders => _orders;
+
+  User? get user => _user;
+
+  final storage = FlutterSecureStorage();
 
   Future<void> fetchOrders() async {
     final prefs = await SharedPreferences.getInstance();
@@ -61,33 +64,43 @@ class UserProvider with ChangeNotifier {
     prefs.setString('ordersData', ordersData);
   }
   
+  Future<void> loadUserProfile() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = prefs.getString('userData');
+    if (userData != null) {
+      _user = User.fromJson(jsonDecode(userData));
+    }
+    notifyListeners();
+  }
+
+  Future<void> saveUserProfile(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    final userData = jsonEncode(user.toJson());
+    prefs.setString('userData', userData);
+    _user = user;
+    notifyListeners();
+  }
+
+  Future<void> updateUserName(String newUsername) async {
+    if (_user != null) {
+      _user = _user!.copyWith(userName: newUsername);
+      await saveUserProfile(_user!);
+    }
+  }
+
+  Future<void> logOut() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('userData');
+    _user = null;
+    notifyListeners();
+  }
+
   Future<void> saveToken() async
   {
     const storage = FlutterSecureStorage();
     String? value = await storage.read(key: 'token');
     token = value;
   }
-
-  Future<void> loadUserProfile() async {
-    try {
-      await saveToken();
-
-      final dio = Dio();
-
-      dio.options.headers['Authorization'] = 'Bearer $token';
-      final response = await dio.get('http://192.168.1.20:3000/profile');
-      final data = response.data;
-      user = User.fromJson(data['user']);
-      notifyListeners();
-
-    } catch (e) {
-      print(e);
-    }
-  }
-
-
-
-
 
   Future<List<Drug>> fetchDrugs() async {
     await saveToken();
@@ -109,12 +122,9 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-
-
   List<Map<String, dynamic>> get drugs => _drugs;
   int get totalDrugs => _totalDrugs;
   int get currentPage => _currentPage;
-
 
   set currentPage(int value) {
     _currentPage = value;
@@ -134,7 +144,6 @@ class UserProvider with ChangeNotifier {
       fetchDrugs();
     }
   }
-
 
   Future<void> searchDrugs(String query, int page) async {
     try {
@@ -156,7 +165,6 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-
   List<Map<String, dynamic>> get drugsSearch => _drugsSearch;
   int get totalDrugsSearch => _totalDrugsSearch;
   int get page => _page;
@@ -175,7 +183,6 @@ class UserProvider with ChangeNotifier {
     }
   }
 
-
   Future<Map<String, dynamic>> getDrugDetails(String id) async {
     try {
       await saveToken();
@@ -192,8 +199,6 @@ class UserProvider with ChangeNotifier {
       throw Exception("Failed to get drug details.");
     }
   }
-
-
 
   Future<List<Drug>> getSimilarDrugs(String id, int similarPage) async {
     try {
@@ -213,22 +218,6 @@ class UserProvider with ChangeNotifier {
   int get totalDrugsSimilar => _totalDrugsSimilar;
   List<Drug> get similarDrugs => _similarDrugs;
   int get similarPage => _similarPage;
-
-  // Future<void> nextPageSimilar(String id) async {
-  //   final drugs = await getSimilarDrugs(id, _similarPage + 1);
-  //   if (drugs.isNotEmpty) {
-  //     _similarDrugs = drugs;
-  //     _similarPage++;
-  //   }
-  // }
-
-  // Future<void> previousPageSimilar(String id) async {
-  //   if (_similarPage > 1) {
-  //     final drugs = await getSimilarDrugs(id, _similarPage - 1);
-  //     _similarDrugs = drugs;
-  //     _similarPage--;
-  //   }
-  // }
 
   Future<void> deleteAllHistory() async {
 
@@ -250,36 +239,5 @@ class UserProvider with ChangeNotifier {
       print('Error deleting history: $e');
     }
   }
-
-  Future<void> updateUserName(String newUserName) async {
-
-    const url = 'http://192.168.1.20:3000/editUser';
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer $token',
-    };
-    final data = {
-      'userName': newUserName,
-    };
-    try {
-      final response = await Dio().put(url, data: data, options: Options(headers: headers));
-
-      if (response.statusCode == 200) {
-        userName = newUserName;
-        notifyListeners();
-      } else {
-        throw Exception('Failed to update username.');
-      }
-    } catch (error) {
-      rethrow;
-    }
-  }
-
-
-
-    Future<void> logOut() async {
-      const storage = FlutterSecureStorage();
-      await storage.delete(key: 'token');
-    }
 
 }

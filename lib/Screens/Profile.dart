@@ -12,7 +12,6 @@ import 'OrderHistoryScreen.dart';
 import 'SearchHistoryScreen.dart';
 import 'login.dart';
 
-// Profile widget
 class Profile extends StatefulWidget {
   final String? newUsername;
 
@@ -62,7 +61,7 @@ class _ProfileState extends State<Profile> {
           ),
         ),
         body: Center(
-          child:Lottie.asset(
+          child: Lottie.asset(
             'assets/Loading.json',
             height: 300,
             width: 300,
@@ -268,7 +267,7 @@ class _ProfileState extends State<Profile> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => SearchHistoryScreen(
-                        searchHistoryFuture: Future.value(user!.searchHistory),
+                        searchHistoryFuture: Future.value(user!.searchHistory.map((item) => {'value': item}).toList())
                       ),
                     ),
                   );
@@ -285,7 +284,7 @@ class _ProfileState extends State<Profile> {
                     context,
                     MaterialPageRoute(
                       builder: (context) => OrderHistoryScreen(
-                        orderHistoryFuture: Future.value(user!.orderHistory),
+                        orderHistoryFuture: Future.value(user!.orderHistory.map((order) => order.toJson()).toList()),
                       ),
                     ),
                   );
