@@ -353,53 +353,6 @@ class UserProvider with ChangeNotifier {
   }
 
 
-  Future<void> checkout(String shippingAddress, String phone, String paymentMethod) async {
-    try {
-      await saveToken();
-
-      final dio = Dio();
-      dio.options.headers['Authorization'] = 'Bearer $token';
-      Response response = await dio.post(
-        'http://192.168.1.20:3000/order/checkout',
-        data: {
-          'shippingAddress': shippingAddress,
-          'phone':phone,
-          'paymentMethod':paymentMethod
-      },
-        options: Options(
-          headers: {'Content-Type': 'application/json'},
-        ),
-      );
-      if (response.statusCode == 200) {
-        print(response.data);
-
-      } else {
-        print('Error: ${response.statusCode}');
-      }
-    } on DioError catch(e)
-    {
-
-      if(e.response!=null)
-      {
-        print(e.response!.data.toString());
-      }
-      else if (e.error is SocketException) {
-        print(e.message.toString());
-      }else if (e.error is TimeoutException) {
-        print(e.message.toString());
-      }
-      else
-      {
-        print(e.message.toString());
-      }
-      rethrow;
-
-
-
-    }
-  }
-
-
 
   Future<void> updateUserName(String newUserName) async {
 

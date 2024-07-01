@@ -1,8 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:graduation_project/Screens/simialrDrugs.dart';
-import 'package:graduation_project/components/button.dart';
 import 'package:graduation_project/helpers/snackbar.dart';
 import 'package:lottie/lottie.dart';
 import 'package:provider/provider.dart';

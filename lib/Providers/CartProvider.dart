@@ -59,4 +59,16 @@ class CartProvider with ChangeNotifier {
     final cartData = jsonEncode(_cart?.toJson());
     prefs.setString('cartData', cartData);
   }
+
+  Future<void> checkout(String shippingAddress, String phone, String paymentMethod) async {
+    
+      print('checkout');
+      print('shippingAddress: $shippingAddress');
+      print('phone: $phone');
+      print('paymentMethod: $paymentMethod');
+
+      cart?.items.clear();
+      await _saveCartToLocalStorage();
+      notifyListeners();
+  }
 }

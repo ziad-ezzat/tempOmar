@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:graduation_project/Providers/CartProvider.dart';
 import 'package:graduation_project/components/button.dart';
 import 'package:graduation_project/helpers/snackbar.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
@@ -188,8 +189,8 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       String shippingAddress = addressController.text;
                       String phone = phoneController.text;
                       String paymentMethod= getPaymentMethod();
-                      UserProvider userProvider =
-                      Provider.of<UserProvider>(context, listen: false);
+                      CartProvider userProvider =
+                      Provider.of<CartProvider>(context, listen: false);
 
                       try {
                         setState(() {
